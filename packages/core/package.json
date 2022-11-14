@@ -8,7 +8,8 @@
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
     }
   },
   "files": [
@@ -24,5 +25,10 @@
     "directory": "core"
   },
   "author": "Dylan N",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@squoosh/lib": "0.4.0",
+    "debug": "^4.3.4",
+    "vite": "^3.2.3"
+  }
 }
