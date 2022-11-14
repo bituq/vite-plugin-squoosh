@@ -3,7 +3,12 @@
   "private": true,
   "version": "1.0.0",
   "description": "A vite plugin for compressing images using squoosh.",
-  "scripts": {},
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "prepare": "husky install",
+    "stub": "pnpm run prepack --filter ./core -- --stub",
+    "postinstall": "pnpm run stub"
+  },
   "keywords": [
     "bituq",
     "squoosh",
@@ -14,7 +19,11 @@
   "devDependencies": {
     "@commitlint/cli": "^17.2.0",
     "@commitlint/config-conventional": "^17.2.0",
+    "@typescript-eslint/eslint-plugin": "^5.42.1",
+    "@typescript-eslint/parser": "^5.42.1",
+    "eslint": "^8.27.0",
     "husky": "^8.0.2",
-    "typescript": "^4.8.4"
+    "typescript": "^4.8.4",
+    "unbuild": "^0.9.4"
   }
 }

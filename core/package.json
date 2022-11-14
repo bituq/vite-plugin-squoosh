@@ -1,0 +1,28 @@
+{
+  "name": "vite-plugin-squoosh",
+  "version": "1.0.0",
+  "description": "A vite plugin for compressing images using squoosh.",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prepack": "pnpm unbuild",
+    "build": "pnpm unbuild",
+    "dev": "pnpm unbuild --stub",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "directory": "core"
+  },
+  "author": "Dylan N",
+  "license": "MIT"
+}
