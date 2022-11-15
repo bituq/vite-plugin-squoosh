@@ -1,17 +1,13 @@
-name: Build
+name: Publish to NPM
 
 on:
   push:
-    paths:
-      - package.json
-      - pnpm-workspace.yaml
-      - packages/**
     branches:
-      - development
-      - master
+      - main
 
 jobs:
-  build:
+  publish-npm:
+    if: "contains(github.event.head_commit.message, 'release')"
     runs-on: ubuntu-latest
 
     steps:
@@ -30,5 +26,7 @@ jobs:
           version: 7.16.0
           run_install: true
 
-      - name: build examples
-        run: pnpm run build:ex
+      - name: Publish to NPM
+        run: pnpm -r publish --access public --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}

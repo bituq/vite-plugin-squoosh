@@ -145,6 +145,5 @@ export default function squooshPlugin(options: ModuleOptions = {}) {
 
             logger.info(pluginLogHeader + chalk.cyanBright(`~${(bytesSaved / 10**6).toFixed(2)}mb reduced`))
         }
-
     }
 }
