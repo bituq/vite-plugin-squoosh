@@ -22,8 +22,14 @@
     "prepublishOnly": "npm run build"
   },
   "repository": {
-    "directory": "core"
+    "type": "git",
+    "url": "https://github.com/bituq/vite-plugin-squoosh",
+    "directory": "packages/core"
   },
+  "bugs": {
+    "url": "https://github.com/bituq/vite-plugin-squoosh/issues"
+  },
+  "homepage": "https://github.com/bituq/vite-plugin-squoosh/tree/master/#readme",
   "author": "Dylan N",
   "license": "MIT",
   "dependencies": {
@@ -34,5 +40,14 @@
   },
   "devDependencies": {
     "@types/node": "^18.11.9"
-  }
+  },
+  "peerDependencies": {
+    "vite": ">=2.x"
+  },
+  "keywords": [
+    "vite",
+    "vite-plugin",
+    "squoosh",
+    "Dylan N"
+  ]
 }
