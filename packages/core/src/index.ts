@@ -82,7 +82,13 @@ export default function squooshPlugin(options: ModuleOptions = {}) {
                         newCodec[Object.keys(codecs)[i]] = codec
 
                         await image.encode(newCodec)
-                        newSize = (await (Object.values(image.encodedWith)[0] as Promise<any>)).size
+
+                        const encodedWith = (await (Object.values(image.encodedWith)[0] as Promise<any>))
+
+                        newSize = encodedWith.size
+
+                        fs.mkdirSync(path.dirname(asset.to), { recursive: true })
+                        fs.writeFileSync(asset.to, encodedWith.binary)
 
                         break
                     }
