@@ -8,7 +8,7 @@
     "prepare": "husky install",
     "stub": "pnpm --filter vite-plugin-squoosh run prepack",
     "postinstall": "pnpm run stub",
-    "build:ex": "pnpm run build --filter ./packages/example-1"
+    "build:ex": "pnpm --filter ./packages/examples/* run build"
   },
   "keywords": [
     "bituq",

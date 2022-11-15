@@ -25,7 +25,11 @@ export default function squooshPlugin(options: ModuleOptions = {}) {
         },
 
         async generateBundle(_, bundler) {
-            debug(bundler)
+            Object.keys(bundler).forEach(key => debug(key))
+        },
+
+        async closeBundle() {
+            
         }
 
     }
