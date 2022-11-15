@@ -1,10 +1,9 @@
 import Encoders from "./_encoders"
 
-export interface Image {
+export interface AssetPath {
     from: string
     to: string
 }
-
 
 export interface ModuleOptions {
     /**

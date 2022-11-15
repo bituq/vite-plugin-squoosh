@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { defaultEncoderOptions, Encoder } from "./types/_encoders";
 
 export function readFilesRecursive(root: string, reg?: RegExp) {
     let resultArr: string[] = []
@@ -16,4 +17,9 @@ export function readFilesRecursive(root: string, reg?: RegExp) {
     }
 
     return resultArr
+}
+
+export function isCorrectFormat(fileName: string, regExp: RegExp) {
+    if (!fileName || !regExp) return false
+    return regExp.test(fileName) || Object.values(defaultEncoderOptions).some((encoder: Encoder) => encoder.extension.test(fileName))
 }
