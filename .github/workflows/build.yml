@@ -22,3 +22,6 @@ jobs:
         with:
           version: 7.16.0
           run_install: true
+
+      - name: build examples
+        run: pnpm run build:ex
