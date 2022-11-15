@@ -41,8 +41,6 @@ export default function squooshPlugin(options: ModuleOptions = {}) {
             logger = config.logger
             publicDir = config.publicDir
             outputPath = path.resolve(config.root, config.build.outDir)
-
-            debug('resolvedConfig:', resolvedConfig)
         },
 
         async generateBundle(_: any, bundler: any) {
@@ -88,6 +86,8 @@ export default function squooshPlugin(options: ModuleOptions = {}) {
                         await image.encode(newCodec)
 
                         const encodedWith = (await (Object.values(image.encodedWith)[0] as Promise<any>))
+
+                        debug("encoded with extension:", encodedWith.extension)
 
                         newSize = encodedWith.size
 
