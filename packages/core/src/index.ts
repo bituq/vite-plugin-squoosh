@@ -9,6 +9,8 @@ import fs from 'fs';
 import os from 'os';
 import { defaultEncoderOptions } from "./types/_encoders";
 
+const pluginLogHeader = chalk.magentaBright('[vite-plugin-squoosh] ')
+
 const pushImageAssets = (files: string[], target: AssetPath[], transformers: { from?: (file: string) => string, to?: (file: string) => string}) =>
     files.filter(file => isCorrectFormat(file, extensions))
     .map(from => ({ from: transformers?.from?.call(transformers, from) ?? from, to: transformers?.to?.call(transformers, from) ?? from}))
@@ -61,6 +63,8 @@ export default function squooshPlugin(options: ModuleOptions = {}) {
 
         async closeBundle() {
             
+            logger.info(pluginLogHeader + chalk.dim('processing ') + files.length + chalk.dim(' assets...'), { clear: true })
+            
             async function processAsset(asset: AssetPath, imagePool: any) {
                 const start = Date.now()
                 const oldSize = fs.lstatSync(asset.from).size
@@ -112,11 +116,13 @@ export default function squooshPlugin(options: ModuleOptions = {}) {
             newAssetPaths.forEach(asset => asset.logPath += ' '.repeat(longestPathNameLength - asset.logPath.length))
 
             let lastTime = 0
+            let bytesSaved = 0
 
             const handles = newAssetPaths.map(async (asset, i) => {
                     const { oldSize, newSize, time } = await processAsset(asset.asset, imagePool)
                     const ratio = Math.round(100 * newSize / oldSize) - 100
                     const timeDifference = time - lastTime
+                    bytesSaved += (oldSize - newSize)
                     
                     logger.info(
                         asset.logPath +
@@ -134,7 +140,8 @@ export default function squooshPlugin(options: ModuleOptions = {}) {
             await Promise.all(handles)
                 
             imagePool.close()
-            
+
+            logger.info(pluginLogHeader + chalk.cyanBright(`~${(bytesSaved / 10**6).toFixed(2)}mb reduced`))
         }
 
     }
