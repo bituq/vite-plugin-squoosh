@@ -29,6 +29,7 @@
   "bugs": {
     "url": "https://github.com/bituq/vite-plugin-squoosh/issues"
   },
+  "readme": "https://github.com/bituq/vite-plugin-squoosh/tree/master/#readme",
   "homepage": "https://github.com/bituq/vite-plugin-squoosh/tree/master/#readme",
   "author": "Dylan N",
   "license": "MIT",
