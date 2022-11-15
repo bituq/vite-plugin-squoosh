@@ -1,6 +1,6 @@
 import { debug, extensions } from "./globals";
 import { AssetPath, ModuleOptions } from "./types";
-import { ResolvedConfig, Logger } from 'vite';
+import { ResolvedConfig, Logger, createLogger } from 'vite';
 import path from 'path';
 import { isCorrectFormat, readFilesRecursive } from "./utilities";
 import chalk from 'chalk';
@@ -25,6 +25,8 @@ const transformAssetPath = (assetPath: AssetPath, transform: (file: string) => s
 })
 
 export default function squooshPlugin(options: ModuleOptions = {}) {
+    if (options.disabled) return {}
+
     let outputPath: string
     let publicDir: string
     let config: ResolvedConfig
@@ -38,7 +40,7 @@ export default function squooshPlugin(options: ModuleOptions = {}) {
 
         configResolved(resolvedConfig: any) {
             config = resolvedConfig
-            logger = config.logger
+            logger = options.silent ? createLogger("silent") : config.logger
             publicDir = config.publicDir
             outputPath = path.resolve(config.root, config.build.outDir)
         },
@@ -60,7 +62,7 @@ export default function squooshPlugin(options: ModuleOptions = {}) {
         },
 
         async closeBundle() {
-            
+
             logger.info(pluginLogHeader + chalk.dim('processing ') + files.length + chalk.dim(' assets...'), { clear: true })
             
             async function processAsset(asset: AssetPath, imagePool: any) {

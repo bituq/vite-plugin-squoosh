@@ -12,11 +12,12 @@ export interface ModuleOptions {
     codecs?: Encoders
     /**
      * Enable/disable logging.
-     * @default: true
+     * @default: false
      */
-    log?: boolean,
+    silent?: boolean,
     /**
      * Enable/disable compression.
+     * @default: false
      */
-    enabled?: boolean
+    disabled?: boolean
 }
