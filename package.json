@@ -6,7 +6,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "prepare": "husky install",
-    "stub": "pnpm run prepack --filter ./packages/* -- --stub",
+    "stub": "pnpm --filter vite-plugin-squoosh run prepack",
     "postinstall": "pnpm run stub",
     "build:ex": "pnpm run build --filter ./packages/example-1"
   },
