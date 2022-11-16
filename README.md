@@ -11,6 +11,15 @@ NPM package coming soon.
 
 ## Usage
 
+**Using NPM:**
+```
+npm install --save-dev vite-plugin-squoosh
+```
+**Using yarn:**
+```
+yarn add -D vite-plugin-squoosh
+```
+
 > Vite configuration in `vite.config.ts`
 ```ts
 import squooshPlugin from 'vite-plugin-squoosh';
