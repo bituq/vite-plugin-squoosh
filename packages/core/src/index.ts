@@ -59,7 +59,7 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
                     to: from => path.resolve(outputPath, path.relative(publicDir, from))
                 })
 
-            logger.info(header + dim('processing', files.length, 'assets...'), { clear: true })
+            logger.info(header + dim('Processing', files.length, 'assets...'), { clear: true })
 
             const codecs: Encoders = {}
 
@@ -93,8 +93,10 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
 
                         newSize = encodedWith.size
 
-                        fs.mkdirSync(path.dirname(asset.to), { recursive: true })
-                        fs.writeFileSync(asset.to, encodedWith.binary)
+                        if (newSize < oldSize) {
+                            fs.mkdirSync(path.dirname(asset.to), { recursive: true })
+                            fs.writeFileSync(asset.to, encodedWith.binary)
+                        }
 
                         break
                     }
@@ -119,17 +121,25 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
 
             let lastTime = 0
             let bytesSaved = 0
+            let notHandled: number | undefined
 
             const handles = newAssetPaths.map(async (asset, i) => {
                     const { oldSize, newSize, time } = await processAsset(asset.asset, imagePool)
+                    
+                    if (newSize >= oldSize) {
+                        notHandled ??= 0
+                        notHandled++
+                        return
+                    }
+
                     const ratio = Math.round(100 * newSize / oldSize) - 100
                     const timeDifference = time - lastTime
                     bytesSaved += (oldSize - newSize)
-                    
+
                     logger.info(
                         asset.logPath +
                         ' ' +
-                        (ratio >= 0 ? chalk.redBright(`+${ratio}%`) : chalk.green(`${ratio}%`)) +
+                        chalk.green(`${ratio}%`) +
                         ' ' +
                         chalk.grey(`${(oldSize / 10**3).toFixed(2)}kb / ${(newSize / 10**3).toFixed(2)}kb`) +
                         ' ' +
@@ -142,6 +152,9 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
             await Promise.all(handles)
                 
             imagePool.close()
+
+            if (notHandled)
+                logger.info(header + dim("Excluded", notHandled, `asset${notHandled == 1 ? '' : 's'} due to an unfavorable compression ratio.`))
 
             logger.info(header + chalk.cyanBright(`~${(bytesSaved / 10**6).toFixed(2)}mb reduced`))
         }
