@@ -49,17 +49,15 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
                 from: file => path.resolve(outputPath, file),
                 to: file => path.resolve(outputPath, file)
             })
-
-            if (!publicDir) return
-
-            // Filter out static images
-            pushImageAssets(readFilesRecursive(publicDir), files, {
-                from: file => path.resolve(publicDir, file),
-                to: from => path.resolve(outputPath, path.relative(publicDir, from))
-            })
         },
 
         async closeBundle() {
+            if (publicDir)
+                // Filter out static images
+                pushImageAssets(readFilesRecursive(publicDir), files, {
+                    from: file => path.resolve(publicDir, file),
+                    to: from => path.resolve(outputPath, path.relative(publicDir, from))
+                })
 
             logger.info(pluginLogHeader + chalk.dim('processing ') + files.length + chalk.dim(' assets...'), { clear: true })
             
