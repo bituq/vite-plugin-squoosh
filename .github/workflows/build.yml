@@ -35,7 +35,7 @@ jobs:
         id: pack
         run: pnpm run pack
 
-      - run: echo ${{ steps.pack }}
+      - run: echo ${{ steps.pack.outputs }}
 
       - name: upload artifact
         uses: actions/upload-artifact@v3
