@@ -32,7 +32,10 @@ jobs:
           run_install: true
 
       - name: pack core
-        run: pnpm run pack
+        id: pack
+        run: pnpm run pack >> $GITHUB_OUTPUT
+
+      - run: echo ${{ steps.pack.outputs }}
 
       - name: upload artifact
         uses: actions/upload-artifact@v3
