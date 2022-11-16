@@ -7,7 +7,7 @@ import chalk from 'chalk';
 import { ImagePool } from "@squoosh/lib";
 import fs from 'fs';
 import os from 'os';
-import { defaultEncoderOptions } from "./types/_encoders";
+import Encoders, { defaultEncoderOptions } from "./types/_encoders";
 
 const pluginLogHeader = chalk.magentaBright('[vite-plugin-squoosh] ')
 
@@ -60,6 +60,11 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
                 })
 
             logger.info(pluginLogHeader + chalk.dim('processing ') + files.length + chalk.dim(' assets...'), { clear: true })
+
+            const codecs: Encoders = {}
+
+            if (options.codecs)
+                Object.keys(defaultEncoderOptions).forEach(key => codecs[key] = { ...defaultEncoderOptions[key], ...(options.codecs ?? {})[key] })
             
             async function processAsset(asset: AssetPath, imagePool: any) {
                 const start = Date.now()
@@ -70,7 +75,6 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
                 // Decode image
                 await image.decoded
 
-                const codecs = {...defaultEncoderOptions, ...(options.codecs ?? {})}
                 const ext = path.extname(asset.from) ?? ''
 
                 for (let i = 0; i < Object.values(codecs).length; i++) {
