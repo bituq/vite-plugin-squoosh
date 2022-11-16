@@ -15,9 +15,4 @@ export interface ModuleOptions {
      * @default: false
      */
     silent?: boolean,
-    /**
-     * Enable/disable compression.
-     * @default: false
-     */
-    disabled?: boolean
 }

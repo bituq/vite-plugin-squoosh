@@ -25,8 +25,6 @@ const transformAssetPath = (assetPath: AssetPath, transform: (file: string) => s
 })
 
 export default function squooshPlugin(options: ModuleOptions = {}) {
-    if (options.disabled) return {}
-
     let outputPath: string
     let publicDir: string
     let config: ResolvedConfig
