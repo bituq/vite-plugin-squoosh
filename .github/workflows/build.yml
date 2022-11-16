@@ -31,13 +31,11 @@ jobs:
           version: 7.16.0
           run_install: true
 
-      - name: pack core
-        run: pnpm run pack
-
       - name: upload artifact
         uses: actions/upload-artifact@v3
         with:
-          path: packages/core/*.tgz
+          name: vite-plugin-squoosh
+          path: packages/core/dist/**
 
       - name: build examples
         run: pnpm run build:ex
