@@ -33,9 +33,11 @@ jobs:
 
       - name: pack core
         id: pack
-        run: pnpm run pack
+        shell: bash
+        run: |
+          echo "FILE_NAME=$(pnpm run pack)" >> $GITHUB_OUTPUT
 
-      - run: echo ${{ steps.pack.outputs }}
+      - run: echo ${{ steps.pack.outputs.FILE_NAME }}
 
       - name: upload artifact
         uses: actions/upload-artifact@v3
