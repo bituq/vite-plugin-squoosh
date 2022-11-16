@@ -33,9 +33,9 @@ jobs:
 
       - name: pack core
         id: pack
-        run: pnpm run pack >> $GITHUB_OUTPUT
+        run: pnpm run pack
 
-      - run: echo ${{ steps.pack.outputs }}
+      - run: echo ${{ steps.pack }}
 
       - name: upload artifact
         uses: actions/upload-artifact@v3
