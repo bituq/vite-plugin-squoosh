@@ -31,19 +31,22 @@ jobs:
           version: 7.16.0
           run_install: true
 
-      - name: pack core
-        id: pack
-        shell: bash
+      - id: package
         run: |
-          echo "FILE_NAME=$(pnpm run pack)" >> $GITHUB_OUTPUT
+          content=`cat ./packages/core/package.json`
+          content="${content//'%'/'%25'}"
+          content="${content//$'\n'/'%0A'}"
+          content="${content//$'\r'/'%0D'}"
+          echo "::set-output name=json::$content"
 
-      - run: echo ${{ steps.pack.outputs.FILE_NAME }}
+      - name: pack core
+        run: pnpm run pack
 
       - name: upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: core
-          path: packages/core/*.tgz
+          path: packages/core/vite-plugin-squoosh-${{ fromJson(steps.package.outputs.json).version }}.tgz
 
       - name: build examples
         run: pnpm run build:ex
