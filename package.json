@@ -1,7 +1,7 @@
 {
   "name": "vite-plugin-squoosh-monorepo",
   "private": true,
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A vite plugin for compressing images using squoosh.",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
