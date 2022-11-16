@@ -1,6 +1,6 @@
 import { debug, extensions } from "./globals";
 import { AssetPath, ModuleOptions } from "./types";
-import { ResolvedConfig, Logger, createLogger } from 'vite';
+import { ResolvedConfig, Logger, createLogger, Plugin } from 'vite';
 import path from 'path';
 import { isCorrectFormat, readFilesRecursive } from "./utilities";
 import chalk from 'chalk';
@@ -24,7 +24,7 @@ const transformAssetPath = (assetPath: AssetPath, transform: (file: string) => s
     to: transform(assetPath.to)
 })
 
-export default function squooshPlugin(options: ModuleOptions = {}) {
+export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
     let outputPath: string
     let publicDir: string
     let config: ResolvedConfig
@@ -36,14 +36,14 @@ export default function squooshPlugin(options: ModuleOptions = {}) {
         apply: 'build',
         enforce: 'post',
 
-        configResolved(resolvedConfig: any) {
+        configResolved(resolvedConfig) {
             config = resolvedConfig
             logger = options.silent ? createLogger("silent") : config.logger
             publicDir = config.publicDir
             outputPath = path.resolve(config.root, config.build.outDir)
         },
 
-        async generateBundle(_: any, bundler: any) {
+        async generateBundle(_, bundler) {
             // Filter out images
             pushImageAssets(Object.keys(bundler), files, {
                 from: file => path.resolve(outputPath, file),
