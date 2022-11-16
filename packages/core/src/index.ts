@@ -76,7 +76,7 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
                 for (let i = 0; i < Object.values(codecs).length; i++) {
                     const codec = Object.values(codecs)[i];
                     
-                    if (codec.extension.test(ext)) {
+                    if (codec.extension?.test(ext)) {
                         let newCodec = {}
 
                         newCodec[Object.keys(codecs)[i]] = codec

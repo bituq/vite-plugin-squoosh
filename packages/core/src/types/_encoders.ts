@@ -3,7 +3,7 @@ interface SharedEncoderOptions {
 }
 
 export interface Encoder {
-    extension: RegExp
+    extension?: RegExp
 }
 
 interface ProgressiveEncoderOptions {
