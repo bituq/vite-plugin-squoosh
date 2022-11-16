@@ -8,8 +8,7 @@ import { ImagePool } from "@squoosh/lib";
 import fs from 'fs';
 import os from 'os';
 import Encoders, { defaultEncoderOptions } from "./types/_encoders";
-
-const pluginLogHeader = chalk.magentaBright('[vite-plugin-squoosh] ')
+import { dim, header } from "./log";
 
 const pushImageAssets = (files: string[], target: AssetPath[], transformers: { from?: (file: string) => string, to?: (file: string) => string}) =>
     files.filter(file => isCorrectFormat(file, extensions))
@@ -25,6 +24,7 @@ const transformAssetPath = (assetPath: AssetPath, transform: (file: string) => s
 })
 
 export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
+
     let outputPath: string
     let publicDir: string
     let config: ResolvedConfig
@@ -59,7 +59,7 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
                     to: from => path.resolve(outputPath, path.relative(publicDir, from))
                 })
 
-            logger.info(pluginLogHeader + chalk.dim('processing ') + files.length + chalk.dim(' assets...'), { clear: true })
+            logger.info(header + dim('processing', files.length, 'assets...'), { clear: true })
 
             const codecs: Encoders = {}
 
@@ -105,8 +105,8 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
 
             const imagePool = new ImagePool(os.cpus().length)
             
-            debug(chalk.dim("Running on"), os.cpus().length, chalk.dim("cores."))
-            debug(files.length, "assets queued.")
+            debug(dim("Running on", os.cpus().length, "cores."))
+            debug(dim(files.length, "assets queued."))
 
             const newAssetPaths: {asset: AssetPath, logPath: string}[] = files.map(asset => ({
                 asset: transformAssetPath(asset, path.normalize),
@@ -143,7 +143,7 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
                 
             imagePool.close()
 
-            logger.info(pluginLogHeader + chalk.cyanBright(`~${(bytesSaved / 10**6).toFixed(2)}mb reduced`))
+            logger.info(header + chalk.cyanBright(`~${(bytesSaved / 10**6).toFixed(2)}mb reduced`))
         }
     }
 }
