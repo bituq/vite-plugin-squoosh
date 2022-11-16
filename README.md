@@ -5,7 +5,7 @@ A vite plugin for compressing and encoding image assets, using [squoosh](https:/
 ## Install
 
 - **Node:** version 16.x
-- **Vite:** version 2.x
+- **Vite:** version >=2.x
 
 NPM package coming soon.
 
