@@ -31,11 +31,21 @@ jobs:
           version: 7.16.0
           run_install: true
 
+      - name: pack
+        run: pnpm run pack
+
+      - uses: a7ul/tar-action@v1.1.0
+        with:
+          command: x
+          files: *.tgz
+
       - name: upload artifact
+        if: success()
         uses: actions/upload-artifact@v3
         with:
           name: vite-plugin-squoosh
-          path: packages/core/dist/**
+          path: package/**
+          if-no-files-found: error
 
       - name: build examples
         run: pnpm run build:ex

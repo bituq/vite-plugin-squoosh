@@ -9,7 +9,7 @@
     "stub": "pnpm --filter vite-plugin-squoosh run prepack",
     "postinstall": "pnpm run stub",
     "build:ex": "pnpm --filter ./packages/examples/* run build",
-    "pack": "pnpm pack -C packages/core"
+    "pack": "pnpm pack --pack-destination ../../ -C packages/core"
   },
   "keywords": [
     "bituq",
