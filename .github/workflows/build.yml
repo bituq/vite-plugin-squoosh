@@ -31,29 +31,5 @@ jobs:
           version: 7.16.0
           run_install: true
 
-      - id: package
-        run: |
-          content=`cat ./packages/core/package.json`
-          content="${content//'%'/'%25'}"
-          content="${content//$'\n'/'%0A'}"
-          content="${content//$'\r'/'%0D'}"
-          echo "::set-output name=json::$content"
-
-      - name: pack core
-        run: pnpm run pack
-
-      - uses: a7ul/tar-action@v1.1.0
-        with:
-          command: x
-          files: vite-plugin-squoosh-${{ fromJson(steps.package.outputs.json).version }}.tgz
-
-      - name: upload artifact
-        if: success()
-        uses: actions/upload-artifact@v3
-        with:
-          name: vite-plugin-squoosh
-          path: package/**
-          if-no-files-found: error
-
       - name: build examples
         run: pnpm run build:ex
