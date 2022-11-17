@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-squoosh",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A vite plugin for compressing images using squoosh.",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
@@ -43,7 +43,7 @@
     "@types/node": "^18.11.9"
   },
   "peerDependencies": {
-    "vite": ">=2.x"
+    "vite": ">=3.x"
   },
   "keywords": [
     "vite",

@@ -95,7 +95,7 @@ export interface OxiPNGEncodeOptions extends Encoder {
     level?: number
 }
 
-export default interface Encoders {
+export default interface EncoderOptions {
     mozjpeg?: MozJPEGEncodeOptions
     webp?: WebPEncodeOptions
     avif?: AvifEncodeOptions
@@ -104,9 +104,11 @@ export default interface Encoders {
     oxipng?: OxiPNGEncodeOptions
 }
 
-export const defaultEncoderOptions: Encoders = {
+export type EncoderType = "mozjpeg" | "webp" | "avif" | "jxl" | "wp2" | "oxipng"
+
+export const defaultEncoderOptions: EncoderOptions = {
     mozjpeg: {
-        extension: /.(jpg|jpeg)/,
+        extension: /.(jpg|jpeg)$/,
         quality: 75,
         baseline: false,
         arithmetic: false,
@@ -125,7 +127,7 @@ export const defaultEncoderOptions: Encoders = {
         chroma_quality: 75,
     },
     webp: {
-        extension: /.webp/,
+        extension: /.webp$/,
         quality: 75,
         target_size: 0,
         target_PSNR: 0,
@@ -155,7 +157,7 @@ export const defaultEncoderOptions: Encoders = {
         use_sharp_yuv: 0,
     },
     avif: {
-        extension: /.avif/,
+        extension: /.avif$/,
         cqLevel: 33,
         cqAlphaLevel: -1,
         denoiseLevel: 0,
@@ -168,7 +170,7 @@ export const defaultEncoderOptions: Encoders = {
         tune: 0 /* AVIFTune.auto */,
     },
     jxl: {
-        extension: /.jxl/,
+        extension: /.jxl$/,
         effort: 1,
         quality: 75,
         progressive: false,
@@ -179,7 +181,7 @@ export const defaultEncoderOptions: Encoders = {
         lossyModular: false,
     },
     wp2: {
-        extension: /.wp2/,
+        extension: /.wp2$/,
         quality: 75,
         alpha_quality: 75,
         effort: 5,
@@ -191,7 +193,7 @@ export const defaultEncoderOptions: Encoders = {
         use_random_matrix: false,
     },
     oxipng: {
-        extension: /.png/,
+        extension: /.png$/,
         level: 2,
     }
 }

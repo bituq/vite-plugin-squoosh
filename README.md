@@ -25,37 +25,30 @@ import squooshPlugin from 'vite-plugin-squoosh';
 
 export default () => ({
     plugins: [squooshPlugin({
+        // Specify codec options.
         codecs: {
-            mozjpeg: {
-                quality: 30,
-                smoothing: 1
-            },
-            webp: {
-                quality: 25
-            },
-            avif: {
-                cqLevel: 20,
-                sharpness: 1
-            },
-            jxl: {
-                quality: 30
-            },
-            wp2: {
-                quality: 40
-            },
-            oxipng: {
-                level: 3
-            }
-        }
+            mozjpeg: { quality: 30, smoothing: 1 },
+            webp: { quality: 25 },
+            avif: { cqLevel: 20, sharpness: 1 },
+            jxl: { quality: 30 },
+            wp2: { quality: 40 },
+            oxipng: { level: 3 }
+        },
+        // Do not encode .wp2 and .webp files.
+        exclude: /.(wp2|webp)$/,
+        // Encode png to webp.
+        encodeTo: { from: /.png$/, to: "oxipng" }
     })]
 })
 ```
 
-### Options
+### Plugin options
 | Option | type | description |
 | ------ | ---- | ----------- |
-| codecs | `Encoders \| undefined` | Codecs to use for processing. [See supported codecs](https://github.com/bituq/vite-plugin-squoosh/blob/master/packages/core/src/types/_encoders.ts). |
-| silent    | `boolean` | Enable/disable logging. |
+| codecs | `EncoderOptions` | Codecs to use for processing. [See supported codecs](https://github.com/bituq/vite-plugin-squoosh/blob/master/packages/core/src/types/_encoders.ts). |
+| silent    | `boolean` | Disable logging. *(default: false)* |
+| exclude | `RegExp` | File names or extensions to exclude. |
+| encodeTo | `{ from: RegExp, to: EncoderType }[]` | Specify what certain file names or extensions will encode to. |
 
 ## Build locally
 

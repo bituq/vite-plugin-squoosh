@@ -19,7 +19,7 @@ export function readFilesRecursive(root: string, reg?: RegExp) {
     return resultArr
 }
 
-export function isCorrectFormat(fileName: string, regExp: RegExp) {
-    if (!fileName || !regExp) return false
-    return regExp.test(fileName) || Object.values(defaultEncoderOptions).some((encoder: Encoder) => encoder.extension.test(fileName))
+export function isCorrectFormat(fileName: string, include: RegExp, exclude?: RegExp) {
+    if (!fileName || !include) return false
+    return !exclude?.test(fileName) && (include.test(fileName) || Object.values(defaultEncoderOptions).some((encoder: Encoder) => encoder.extension?.test(fileName)))
 }

@@ -1,4 +1,4 @@
-import Encoders from "./_encoders"
+import EncoderOptions, { EncoderType } from "./_encoders"
 
 export interface AssetPath {
     from: string
@@ -9,10 +9,21 @@ export interface ModuleOptions {
     /**
      * @see {@link https://github.com/GoogleChromeLabs/squoosh/blob/dev/libsquoosh/src/codecs.ts}
      */
-    codecs?: Encoders
+    codecs?: EncoderOptions
     /**
      * Enable/disable logging.
      * @default: false
      */
     silent?: boolean,
+    /**
+     * File names or extensions to exclude.
+     * @example
+     * // Exclude all webp and wp2 extensions.
+     * { exclude: /.(webp|wp2)$/}
+     */
+    exclude?: RegExp,
+    /**
+     * Specify what certain file names or extensions will encode to.
+     */
+    encodeTo?: { from: RegExp, to: EncoderType }[]
 }

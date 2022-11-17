@@ -7,16 +7,9 @@ import chalk from 'chalk';
 import { ImagePool } from "@squoosh/lib";
 import fs from 'fs';
 import os from 'os';
-import Encoders, { defaultEncoderOptions } from "./types/_encoders";
+import { defaultEncoderOptions } from "./types/_encoders";
 import { dim, header } from "./log";
-
-const pushImageAssets = (files: string[], target: AssetPath[], transformers: { from?: (file: string) => string, to?: (file: string) => string}) =>
-    files.filter(file => isCorrectFormat(file, extensions))
-    .map(from => ({ from: transformers?.from?.call(transformers, from) ?? from, to: transformers?.to?.call(transformers, from) ?? from}))
-    .forEach(({from, to}) => {
-        debug(chalk.magentaBright(from), "->", chalk.blueBright(to))
-        target.push({from, to})
-    })
+import EncoderOptions from "./types/_encoders";
 
 const transformAssetPath = (assetPath: AssetPath, transform: (file: string) => string): AssetPath => ({
     from: transform(assetPath.from),
@@ -24,12 +17,19 @@ const transformAssetPath = (assetPath: AssetPath, transform: (file: string) => s
 })
 
 export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
-
     let outputPath: string
     let publicDir: string
     let config: ResolvedConfig
     let logger: Logger
     let files: AssetPath[] = []
+
+    const pushImageAssets = (files: string[], target: AssetPath[], transformers: { from?: (file: string) => string, to?: (file: string) => string}) =>
+        files.filter(file => isCorrectFormat(file, extensions, options.exclude))
+        .map(from => ({ from: transformers?.from?.call(transformers, from) ?? from, to: transformers?.to?.call(transformers, from) ?? from}))
+        .forEach(({from, to}) => {
+            debug(chalk.magentaBright(from), "->", chalk.blueBright(to))
+            target.push({from, to})
+        })
 
     return {
         name: 'vite:squoosh',
@@ -61,7 +61,7 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
 
             logger.info(header + dim('Processing', files.length, 'assets...'), { clear: true })
 
-            const codecs: Encoders = {}
+            const codecs: EncoderOptions = {}
 
             if (options.codecs)
                 Object.keys(defaultEncoderOptions).forEach(key => codecs[key] = { ...defaultEncoderOptions[key], ...(options.codecs ?? {})[key] })
@@ -76,30 +76,36 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
                 await image.decoded
 
                 const ext = path.extname(asset.from) ?? ''
+                const encodeTo = options.encodeTo?.find(value => value.from.test(ext))?.to
 
                 for (let i = 0; i < Object.values(codecs).length; i++) {
                     const codec = Object.values(codecs)[i];
+                    const encoderType = Object.keys(codecs)[i]
+
+                    if (typeof encodeTo !== "undefined") {
+                        if (encodeTo != encoderType)
+                            continue
+                    } else if (!codec.extension?.test(ext))
+                        continue
                     
-                    if (codec.extension?.test(ext)) {
-                        let newCodec = {}
+                    let newCodec = {}
+                    
+                    newCodec[Object.keys(codecs)[i]] = codec
+                    
+                    await image.encode(newCodec)
+                    
+                    const encodedWith = (await (Object.values(image.encodedWith)[0] as Promise<any>))
 
-                        newCodec[Object.keys(codecs)[i]] = codec
+                    debug("to:", encodeTo ?? encoderType)
+                    
+                    newSize = encodedWith.size
 
-                        await image.encode(newCodec)
-
-                        const encodedWith = (await (Object.values(image.encodedWith)[0] as Promise<any>))
-
-                        debug("encoded with extension:", encodedWith.extension)
-
-                        newSize = encodedWith.size
-
-                        if (newSize < oldSize) {
-                            fs.mkdirSync(path.dirname(asset.to), { recursive: true })
-                            fs.writeFileSync(asset.to, encodedWith.binary)
-                        }
-
-                        break
+                    if (newSize < oldSize) {
+                        fs.mkdirSync(path.dirname(asset.to), { recursive: true })
+                        fs.writeFileSync(asset.to, encodedWith.binary)
                     }
+
+                    break
                 }
 
                 return { oldSize, newSize, time: Date.now() - start }
