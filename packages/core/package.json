@@ -13,8 +13,7 @@
     }
   },
   "files": [
-    "dist",
-    "../../README.md"
+    "dist"
   ],
   "scripts": {
     "prepack": "pnpm unbuild",
