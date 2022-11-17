@@ -56,8 +56,12 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
                 // Filter out static images
                 pushImageAssets(readFilesRecursive(publicDir), files, {
                     from: file => path.resolve(publicDir, file),
-                    to: from => path.resolve(outputPath, path.relative(publicDir, from))
+                    to: file => path.resolve(outputPath, path.relative(publicDir, file))
                 })
+            if (options.includeDirs)
+                for (const dir of options.includeDirs)
+                // Filter out additional files
+                pushImageAssets(readFilesRecursive(dir), files, {})
 
             logger.info(header + dim('Processing', files.length, 'assets...'), { clear: true })
 
