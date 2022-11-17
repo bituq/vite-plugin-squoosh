@@ -20,6 +20,8 @@ jobs:
           node-version: 16.x
           registry-url: https://registry.npmjs.org/
 
+      - run: cp README.md packages/core/README.md
+
       - name: install pnpm
         uses: pnpm/action-setup@v2.2.4
         with:
