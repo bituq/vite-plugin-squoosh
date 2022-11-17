@@ -76,30 +76,36 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
                 await image.decoded
 
                 const ext = path.extname(asset.from) ?? ''
+                const encodeTo = options.encodeTo?.find(value => value.from.test(ext))?.to
 
                 for (let i = 0; i < Object.values(codecs).length; i++) {
                     const codec = Object.values(codecs)[i];
+                    const encoderType = Object.keys(codecs)[i]
+
+                    if (typeof encodeTo !== "undefined") {
+                        if (encodeTo != encoderType)
+                            continue
+                    } else if (!codec.extension?.test(ext))
+                        continue
                     
-                    if (codec.extension?.test(ext)) {
-                        let newCodec = {}
+                    let newCodec = {}
+                    
+                    newCodec[Object.keys(codecs)[i]] = codec
+                    
+                    await image.encode(newCodec)
+                    
+                    const encodedWith = (await (Object.values(image.encodedWith)[0] as Promise<any>))
 
-                        newCodec[Object.keys(codecs)[i]] = codec
+                    debug("to:", encodeTo ?? encoderType)
+                    
+                    newSize = encodedWith.size
 
-                        await image.encode(newCodec)
-
-                        const encodedWith = (await (Object.values(image.encodedWith)[0] as Promise<any>))
-
-                        debug("encoded with extension:", encodedWith.extension)
-
-                        newSize = encodedWith.size
-
-                        if (newSize < oldSize) {
-                            fs.mkdirSync(path.dirname(asset.to), { recursive: true })
-                            fs.writeFileSync(asset.to, encodedWith.binary)
-                        }
-
-                        break
+                    if (newSize < oldSize) {
+                        fs.mkdirSync(path.dirname(asset.to), { recursive: true })
+                        fs.writeFileSync(asset.to, encodedWith.binary)
                     }
+
+                    break
                 }
 
                 return { oldSize, newSize, time: Date.now() - start }

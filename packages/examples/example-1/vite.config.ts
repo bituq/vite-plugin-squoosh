@@ -14,7 +14,9 @@ export default defineConfig({
         quality: 10
       },
     },
-    exclude: /.(jpeg)$/
+    encodeTo: [
+      { from: /.(png)$/, to: "webp"}
+    ]
   })],
   resolve: {
     alias: {

@@ -25,5 +25,5 @@ export interface ModuleOptions {
     /**
      * Specify what certain file names or extensions will encode to.
      */
-    // encodeTo?: { from: RegExp, to: EncoderType }[]
+    encodeTo?: { from: RegExp, to: EncoderType }[]
 }
