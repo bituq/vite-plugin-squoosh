@@ -43,7 +43,7 @@
     "@types/node": "^18.11.9"
   },
   "peerDependencies": {
-    "vite": ">=2.x"
+    "vite": ">=3.x"
   },
   "keywords": [
     "vite",
