@@ -7,16 +7,9 @@ import chalk from 'chalk';
 import { ImagePool } from "@squoosh/lib";
 import fs from 'fs';
 import os from 'os';
-import Encoders, { defaultEncoderOptions } from "./types/_encoders";
+import { defaultEncoderOptions } from "./types/_encoders";
 import { dim, header } from "./log";
-
-const pushImageAssets = (files: string[], target: AssetPath[], transformers: { from?: (file: string) => string, to?: (file: string) => string}) =>
-    files.filter(file => isCorrectFormat(file, extensions))
-    .map(from => ({ from: transformers?.from?.call(transformers, from) ?? from, to: transformers?.to?.call(transformers, from) ?? from}))
-    .forEach(({from, to}) => {
-        debug(chalk.magentaBright(from), "->", chalk.blueBright(to))
-        target.push({from, to})
-    })
+import EncoderOptions from "./types/_encoders";
 
 const transformAssetPath = (assetPath: AssetPath, transform: (file: string) => string): AssetPath => ({
     from: transform(assetPath.from),
@@ -24,12 +17,19 @@ const transformAssetPath = (assetPath: AssetPath, transform: (file: string) => s
 })
 
 export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
-
     let outputPath: string
     let publicDir: string
     let config: ResolvedConfig
     let logger: Logger
     let files: AssetPath[] = []
+
+    const pushImageAssets = (files: string[], target: AssetPath[], transformers: { from?: (file: string) => string, to?: (file: string) => string}) =>
+        files.filter(file => isCorrectFormat(file, extensions, options.exclude))
+        .map(from => ({ from: transformers?.from?.call(transformers, from) ?? from, to: transformers?.to?.call(transformers, from) ?? from}))
+        .forEach(({from, to}) => {
+            debug(chalk.magentaBright(from), "->", chalk.blueBright(to))
+            target.push({from, to})
+        })
 
     return {
         name: 'vite:squoosh',
@@ -61,7 +61,7 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
 
             logger.info(header + dim('Processing', files.length, 'assets...'), { clear: true })
 
-            const codecs: Encoders = {}
+            const codecs: EncoderOptions = {}
 
             if (options.codecs)
                 Object.keys(defaultEncoderOptions).forEach(key => codecs[key] = { ...defaultEncoderOptions[key], ...(options.codecs ?? {})[key] })

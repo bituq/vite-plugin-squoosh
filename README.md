@@ -54,7 +54,7 @@ export default () => ({
 ### Options
 | Option | type | description |
 | ------ | ---- | ----------- |
-| codecs | `Encoders \| undefined` | Codecs to use for processing. [See supported codecs](https://github.com/bituq/vite-plugin-squoosh/blob/master/packages/core/src/types/_encoders.ts). |
+| codecs | `EncoderOptions \| undefined` | Codecs to use for processing. [See supported codecs](https://github.com/bituq/vite-plugin-squoosh/blob/master/packages/core/src/types/_encoders.ts). |
 | silent    | `boolean` | Enable/disable logging. |
 
 ## Build locally
