@@ -29,5 +29,5 @@ export interface ModuleOptions {
     /**
      * Additional directories to include. **WARNING!** These images will be replaced with their encoded versions.
      */
-    includeDirs?: string[]
+    includeDirs?: string[] | { from: string, to: string }[]
 }

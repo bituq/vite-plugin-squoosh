@@ -16,6 +16,9 @@ export default defineConfig({
     },
     encodeTo: [
       { from: /.(png)$/, to: "webp"}
+    ],
+    includeDirs: [
+      { from: "./public", to: "./compressed"}
     ]
   })],
   resolve: {

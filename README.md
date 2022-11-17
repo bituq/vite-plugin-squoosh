@@ -49,7 +49,7 @@ export default () => ({
 | silent    | `boolean` | Disable logging. *(default: false)* |
 | exclude | `RegExp` | File names or extensions to exclude. |
 | encodeTo | `{ from: RegExp, to: EncoderType }[]` | Specify what certain file names or extensions will encode to. |
-| includeDirs | `string[]` | Additional directories to include. **WARNING!** These images will be replaced with their encoded versions. |
+| includeDirs | `string[] | {from: string, to: string}` | Additional directories to include. **WARNING!** These images will be replaced with their encoded versions. |
 
 ## Build locally
 
