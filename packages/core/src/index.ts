@@ -123,6 +123,11 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
 
             Object.keys(codecs).forEach(codec => reuse[codec] = JSON.stringify(cache.options?.[codec]) == JSON.stringify(codecs[codec]))
 
+            Object.keys(reuse).forEach(codec => {
+                if (!reuse[codec] && cache.assets)
+                    cache.assets[codec] = []
+            })
+            
             const newAssetPaths: EncoderAsset[] = files.map(asset => ({
                 asset: transformAssetPath(asset, path.normalize),
                 logPath: path.normalize(path.join(chalk.dim(config.build.outDir), chalk.blue(path.relative(outputPath, asset.to)))),
@@ -136,18 +141,24 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
             newAssetPaths.forEach(asset => {
                 const ext = path.extname(asset.asset.from)
                 const encodeTo = options.encodeTo?.find(value => value.from.test(ext))?.to  
+                
                 asset.encodeWith = encodeTo ?? Object.keys(codecs).find(codec => codecs[codec].extension?.test(ext))
                 asset.size = fs.lstatSync(asset.asset.from).size
+
                 if (asset.encodeWith && options.cacheLevel != "None") {
                     cache.assets ??= {}
                     cache.assets[asset.encodeWith] ??= []
                     const other = cache.assets[asset.encodeWith].find(other => other.from == asset.asset.from)
-                    if (reuse[asset.encodeWith] && other && fs.existsSync(other.to)) {
-                        asset.asset.from = other.to
-                        asset.encodeWith = undefined
+
+                    if (reuse[asset.encodeWith] && other) {
+                        if (fs.existsSync(other.to)) {
+                            asset.asset.from = other.to
+                            asset.encodeWith = undefined
+                        }
                     } else
                         cache.assets[asset.encodeWith]?.push({...asset.asset})
                 }
+
                 asset.logPath += ' '.repeat(longestPathNameLength - asset.logPath.length)
             })
 

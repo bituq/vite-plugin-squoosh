@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [vue(), squooshPlugin({
     codecs: {
       mozjpeg: {
-        quality: 15
+        quality: 10
       },
       webp: {
         quality: 10
