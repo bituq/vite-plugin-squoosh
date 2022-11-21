@@ -1,3 +1,5 @@
+import { AssetPath } from "./_cache"
+
 interface SharedEncoderOptions {
     quality?: number
 }
@@ -105,6 +107,8 @@ export default interface EncoderOptions {
 }
 
 export type EncoderType = "mozjpeg" | "webp" | "avif" | "jxl" | "wp2" | "oxipng"
+
+export interface EncoderAsset {asset: AssetPath, logPath: string, encodeWith?: string | EncoderType}
 
 export const defaultEncoderOptions: EncoderOptions = {
     mozjpeg: {

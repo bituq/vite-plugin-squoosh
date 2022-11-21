@@ -19,7 +19,8 @@ export default defineConfig({
     ],
     includeDirs: [
       { from: "./public", to: "./compressed"}
-    ]
+    ],
+    useCache: true
   })],
   resolve: {
     alias: {
