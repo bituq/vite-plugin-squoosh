@@ -37,7 +37,7 @@ export default () => ({
         // Do not encode .wp2 and .webp files.
         exclude: /.(wp2|webp)$/,
         // Encode png to webp.
-        encodeTo: { from: /.png$/, to: "oxipng" }
+        encodeTo: { from: /.png$/, to: "webp" }
     })]
 })
 ```
