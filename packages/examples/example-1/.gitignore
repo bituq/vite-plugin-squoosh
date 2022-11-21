@@ -28,3 +28,4 @@ coverage
 *.sw?
 
 compressed
+vite-plugin-squoosh-cache.json

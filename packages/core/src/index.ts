@@ -24,6 +24,9 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
     let logger: Logger
     let files: AssetPath[] = []
 
+    options.cacheLevel ??= "None"
+    options.cachePath ??= "./vite-plugin-squoosh-cache.json"
+
     const pushImageAssets = (files: string[], target: AssetPath[], transformers: { from?: (file: string) => string, to?: (file: string) => string}) =>
         files.filter(file => isCorrectFormat(file, extensions, options.exclude))
         .map(from => ({ from: transformers?.from?.call(transformers, from) ?? from, to: transformers?.to?.call(transformers, from) ?? from}))
@@ -109,8 +112,17 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
             debug(dim("Running on", os.cpus().length, "cores."))
             debug(dim(files.length, "assets queued."))
 
-            const cache: PluginCache = {}
-            
+            let cache: PluginCache = {options: codecs}
+
+            if (options.cacheLevel === "Persistent" && options.cachePath) {
+                if (fs.existsSync(options.cachePath))
+                    cache = JSON.parse(fs.readFileSync(options.cachePath, {encoding: "utf-8"}))
+            }
+
+            const reuse: {[K in EncoderType]?: boolean} = {}
+
+            Object.keys(codecs).forEach(codec => reuse[codec] = JSON.stringify(cache.options?.[codec]) == JSON.stringify(codecs[codec]))
+
             const newAssetPaths: EncoderAsset[] = files.map(asset => ({
                 asset: transformAssetPath(asset, path.normalize),
                 logPath: path.normalize(path.join(chalk.dim(config.build.outDir), chalk.blue(path.relative(outputPath, asset.to)))),
@@ -119,15 +131,18 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
             
             const longestPathNameLength = newAssetPaths.sort((a, b) => b.logPath.length - a.logPath.length)[0].logPath.length
             
+            Object.keys(reuse).forEach(codec => debug(codec, '=>', reuse[codec]))
+
             newAssetPaths.forEach(asset => {
                 const ext = path.extname(asset.asset.from)
                 const encodeTo = options.encodeTo?.find(value => value.from.test(ext))?.to  
                 asset.encodeWith = encodeTo ?? Object.keys(codecs).find(codec => codecs[codec].extension?.test(ext))
-                if (asset.encodeWith && options.useCache) {
+                asset.size = fs.lstatSync(asset.asset.from).size
+                if (asset.encodeWith && options.cacheLevel != "None") {
                     cache.assets ??= {}
                     cache.assets[asset.encodeWith] ??= []
                     const other = cache.assets[asset.encodeWith].find(other => other.from == asset.asset.from)
-                    if (other && fs.existsSync(other.to)) {
+                    if (reuse[asset.encodeWith] && other && fs.existsSync(other.to)) {
                         asset.asset.from = other.to
                         asset.encodeWith = undefined
                     } else
@@ -177,7 +192,16 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
                     ' ' +
                     chalk.grey(`Copied from ${path.relative(outputPath, asset.asset.from)}`)
                 )
+
+                if (asset.size)
+                    bytesSaved += (asset.size - fs.lstatSync(asset.asset.to).size)
             })
+
+            if (options.cacheLevel == "Persistent" && options.cachePath) {
+                cache.options = codecs
+                fs.mkdirSync(path.dirname(options.cachePath), {recursive: true})
+                fs.writeFileSync(options.cachePath, JSON.stringify(cache))
+            }
 
             if (notHandled)
                 logger.info(header + dim("Excluded", notHandled, `asset${notHandled == 1 ? '' : 's'} due to an unfavorable compression ratio.`))

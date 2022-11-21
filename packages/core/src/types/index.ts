@@ -1,3 +1,4 @@
+import { CacheLevel } from "./_cache"
 import EncoderOptions, { EncoderType } from "./_encoders"
 
 export interface ModuleOptions {
@@ -27,7 +28,11 @@ export interface ModuleOptions {
     includeDirs?: string[] | { from: string, to: string }[]
     /**
      * Toggle asset caching. When enabled, encoded assets will be reused.
-     * @default: false
+     * @default: "None"
      */
-    useCache?: boolean
+    cacheLevel?: CacheLevel
+    /**
+     * The file path to store the cache to when the cache level is persistent.
+     */
+    cachePath?: string
 }

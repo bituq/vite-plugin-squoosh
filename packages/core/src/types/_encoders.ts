@@ -108,7 +108,7 @@ export default interface EncoderOptions {
 
 export type EncoderType = "mozjpeg" | "webp" | "avif" | "jxl" | "wp2" | "oxipng"
 
-export interface EncoderAsset {asset: AssetPath, logPath: string, encodeWith?: string | EncoderType}
+export interface EncoderAsset {asset: AssetPath, logPath: string, encodeWith?: string | EncoderType, size?: number}
 
 export const defaultEncoderOptions: EncoderOptions = {
     mozjpeg: {

@@ -50,7 +50,8 @@ export default () => ({
 | exclude | `RegExp` | File names or extensions to exclude. |
 | encodeTo | `{ from: RegExp, to: EncoderType }[]` | Specify what certain file names or extensions will encode to. |
 | includeDirs | `string[] \| {from: string, to: string}` | Additional directories to include. **WARNING!** These images will be replaced with their encoded versions. |
-| useCache | `boolean` | Toggle asset caching. When enabled, encoded assets will be reused to save time. |
+| cacheLevel | `"None" \| "PerSession" \| "Persistent"` | Toggle asset caching. When enabled, encoded assets will be reused. |
+| cachePath | `string` |  The file path to store the cache to when the cache level is persistent. |
 
 ## Build locally
 

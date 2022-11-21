@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [vue(), squooshPlugin({
     codecs: {
       mozjpeg: {
-        quality: 10
+        quality: 15
       },
       webp: {
         quality: 10
@@ -20,7 +20,7 @@ export default defineConfig({
     includeDirs: [
       { from: "./public", to: "./compressed"}
     ],
-    useCache: true
+    cacheLevel: "Persistent"
   })],
   resolve: {
     alias: {
