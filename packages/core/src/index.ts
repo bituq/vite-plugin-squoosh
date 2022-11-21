@@ -151,7 +151,7 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
                     const other = cache.assets[asset.encodeWith].find(other => other.from == asset.asset.from)
 
                     if (reuse[asset.encodeWith] && other) {
-                        if (fs.existsSync(other.to)) {
+                        if (fs.existsSync(other.to) && fs.lstatSync(other.to).size < fs.lstatSync(asset.asset.from).size) {
                             asset.asset.from = other.to
                             asset.encodeWith = undefined
                         }
