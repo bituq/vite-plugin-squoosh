@@ -1,4 +1,4 @@
-import { CacheLevel } from "./_cache"
+import { CacheLevel, FromTo } from "./_cache"
 import EncoderOptions, { EncoderType } from "./_encoders"
 
 export interface ModuleOptions {
@@ -25,7 +25,7 @@ export interface ModuleOptions {
     /**
      * Additional directories to include. **WARNING!** These images will be replaced with their encoded versions.
      */
-    includeDirs?: string[] | { from: string, to: string }[]
+    includeDirs?: string[] | FromTo<string>[]
     /**
      * Toggle asset caching. When enabled, encoded assets will be reused.
      * @default: "None"

@@ -1,6 +1,33 @@
 import fs from "fs";
 import path from "path";
 import { defaultEncoderOptions, Encoder } from "./types/_encoders";
+import { AssetPath, FromTo } from "./types/_cache";
+import { debug, extensions } from "./globals";
+import chalk from "chalk";
+
+/**
+ * Transform a path.
+ */
+type TransformFunction = (path: string) => string
+
+/**
+ * Transform an AssetPath.
+ */
+export const transformAssetPath = (assetPath: AssetPath, transform: TransformFunction): AssetPath => ({
+    from: transform(assetPath.from),
+    to: transform(assetPath.to)
+})
+
+export const pushImageAssets = (filePaths: string[], target: AssetPath[], transformers: { from?: TransformFunction, to?: TransformFunction}, exclude?: RegExp) => 
+    filePaths.filter(path => isCorrectFormat(path, extensions, exclude))
+    .map(from => ({
+        from: transformers?.from?.call(transformers, from) ?? from,
+        to: transformers?.to?.call(transformers, from) ?? from
+    }))
+    .forEach(({from, to}) => {
+        debug(chalk.magentaBright(from), '->', chalk.blueBright(to))
+        target.push({from, to})
+    })
 
 export function readFilesRecursive(root: string, reg?: RegExp) {
     let resultArr: string[] = []
@@ -23,3 +50,6 @@ export function isCorrectFormat(fileName: string, include: RegExp, exclude?: Reg
     if (!fileName || !include) return false
     return !exclude?.test(fileName) && (include.test(fileName) || Object.values(defaultEncoderOptions).some((encoder: Encoder) => encoder.extension?.test(fileName)))
 }
+
+export const forEachKey = <T extends {}>(object: T, callbackfn: (key: string, value: T, index: number) => any) =>
+    Object.keys(object).forEach((key, index) => callbackfn(key, object[key], index))

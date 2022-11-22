@@ -1,8 +1,8 @@
-import { debug, extensions } from "./globals";
+import { debug } from "./globals";
 import { ModuleOptions } from "./types";
 import { ResolvedConfig, Logger, createLogger, Plugin } from 'vite';
 import path from 'path';
-import { isCorrectFormat, readFilesRecursive } from "./utilities";
+import { forEachKey, pushImageAssets, readFilesRecursive, transformAssetPath } from "./utilities";
 import chalk from 'chalk';
 import { ImagePool } from "@squoosh/lib";
 import fs from 'fs';
@@ -11,11 +11,6 @@ import { defaultEncoderOptions, EncoderAsset, EncoderType } from "./types/_encod
 import { dim, header } from "./log";
 import EncoderOptions from "./types/_encoders";
 import PluginCache, { AssetPath } from "./types/_cache";
-
-const transformAssetPath = (assetPath: AssetPath, transform: (file: string) => string): AssetPath => ({
-    from: transform(assetPath.from),
-    to: transform(assetPath.to)
-})
 
 export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
     let outputPath: string
@@ -26,14 +21,6 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
 
     options.cacheLevel ??= "None"
     options.cachePath ??= "./vite-plugin-squoosh-cache.json"
-
-    const pushImageAssets = (files: string[], target: AssetPath[], transformers: { from?: (file: string) => string, to?: (file: string) => string}) =>
-        files.filter(file => isCorrectFormat(file, extensions, options.exclude))
-        .map(from => ({ from: transformers?.from?.call(transformers, from) ?? from, to: transformers?.to?.call(transformers, from) ?? from}))
-        .forEach(({from, to}) => {
-            debug(chalk.magentaBright(from), "->", chalk.blueBright(to))
-            target.push({from, to})
-        })
 
     return {
         name: 'vite:squoosh',
@@ -52,7 +39,7 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
             pushImageAssets(Object.keys(bundler), files, {
                 from: file => path.resolve(outputPath, file),
                 to: file => path.resolve(outputPath, file)
-            })
+            }, options.exclude)
         },
 
         async closeBundle() {
@@ -61,24 +48,26 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
                 pushImageAssets(readFilesRecursive(publicDir), files, {
                     from: file => path.resolve(publicDir, file),
                     to: file => path.resolve(outputPath, path.relative(publicDir, file))
-                })
+                }, options.exclude)
+                
             // Filter out additional files
             if (options.includeDirs)
                 for (const dir of options.includeDirs)
                     if (typeof dir === "string")
-                        pushImageAssets(readFilesRecursive(dir), files, {})
+                        pushImageAssets(readFilesRecursive(dir), files, {}, options.exclude)
                     else
                         pushImageAssets(readFilesRecursive(dir.from), files, {
                             from: file => path.resolve(config.root, file),
                             to: file => path.resolve(dir.to, path.basename(file))
-                        })
+                        }, options.exclude)
 
             logger.info(header + dim('Processing', files.length, 'assets...'), { clear: true })
 
             const codecs: EncoderOptions = {}
 
+            // Merge the default codecs with the selected codecs.
             if (options.codecs)
-                Object.keys(defaultEncoderOptions).forEach(key => codecs[key] = { ...defaultEncoderOptions[key], ...(options.codecs ?? {})[key] })
+                forEachKey(defaultEncoderOptions, (key, value) => codecs[key] = {...value, ...(options.codecs ?? {})[key]})
             
             async function processAsset(asset: AssetPath, encodeWith: EncoderType, imagePool: any) {
                 const start = Date.now()
@@ -114,23 +103,24 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
 
             let cache: PluginCache = {options: codecs}
 
-            if (options.cacheLevel === "Persistent" && options.cachePath) {
+            if (options.cacheLevel === "Persistent" && options.cachePath)
                 if (fs.existsSync(options.cachePath))
-                    cache = JSON.parse(fs.readFileSync(options.cachePath, {encoding: "utf-8"}))
-            }
+                    cache = JSON.parse(fs.readFileSync(options.cachePath, {encoding: "utf8"}))
 
             const reuse: {[K in EncoderType]?: boolean} = {}
 
-            Object.keys(codecs).forEach(codec => reuse[codec] = JSON.stringify(cache.options?.[codec]) == JSON.stringify(codecs[codec]))
+            forEachKey(codecs, (key, codec) => reuse[key] = JSON.stringify(cache.options?.[key]) == JSON.stringify(codec))
 
-            Object.keys(reuse).forEach(codec => {
-                if (!reuse[codec] && cache.assets)
-                    cache.assets[codec] = []
+            forEachKey(reuse, (key, codec) => {
+                if (!codec && cache.assets)
+                    cache.assets[key] = []
             })
             
+            const relativePath = (p: string) => path.normalize(path.join(chalk.dim(config.build.outDir), chalk.blue(path.relative(outputPath, p))))
+
             const newAssetPaths: EncoderAsset[] = files.map(asset => ({
                 asset: transformAssetPath(asset, path.normalize),
-                logPath: path.normalize(path.join(chalk.dim(config.build.outDir), chalk.blue(path.relative(outputPath, asset.to)))),
+                logPath: relativePath(asset.to),
                 encodeWith: options.encodeTo?.find(value => value.from.test(path.extname(asset.from)))?.to
             }))
             
@@ -166,8 +156,8 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
             let bytesSaved = 0
             let notHandled: number | undefined
 
-            const handles = newAssetPaths.filter(asset => asset.encodeWith).map(async asset => {
-                const { oldSize, newSize, time } = await processAsset(asset.asset, asset.encodeWith as EncoderType, imagePool)
+            const handles = newAssetPaths.filter(asset => asset.encodeWith).map(async ({asset, encodeWith, logPath}) => {
+                const { oldSize, newSize, time } = await processAsset(asset, encodeWith as EncoderType, imagePool)
                 
                 if (newSize >= oldSize) {
                     notHandled ??= 0
@@ -179,7 +169,7 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
                 bytesSaved += (oldSize - newSize)
 
                 logger.info(
-                    asset.logPath +
+                    logPath +
                     ' ' +
                     chalk.green(`${ratio}%`) +
                     ' ' +
@@ -195,17 +185,19 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
                 
             imagePool.close()
 
-            newAssetPaths.filter(asset => !asset.encodeWith).forEach(asset => {
-                fs.mkdirSync(path.dirname(asset.asset.to), { recursive: true })
-                fs.copyFileSync(asset.asset.from, asset.asset.to)
+            newAssetPaths.filter(asset => !asset.encodeWith).forEach(({asset, logPath, size}) => {
+                if (asset.from === asset.to) return;
+
+                fs.mkdirSync(path.dirname(asset.to), { recursive: true })
+                fs.copyFileSync(asset.from, asset.to)
                 logger.info(
-                    asset.logPath +
+                    logPath +
                     ' ' +
-                    chalk.grey(`Copied from ${path.relative(outputPath, asset.asset.from)}`)
+                    chalk.grey(`Copied from ${relativePath(asset.from)}`)
                 )
 
-                if (asset.size)
-                    bytesSaved += (asset.size - fs.lstatSync(asset.asset.to).size)
+                if (size)
+                    bytesSaved += (size - fs.lstatSync(asset.to).size)
             })
 
             if (options.cacheLevel == "Persistent" && options.cachePath) {
