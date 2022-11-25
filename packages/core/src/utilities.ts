@@ -1,7 +1,7 @@
-import fs from "fs";
+import fs, { PathOrFileDescriptor, readFileSync } from "fs";
 import path from "path";
 import { defaultEncoderOptions, Encoder } from "./types/_encoders";
-import { AssetPath, FromTo } from "./types/_cache";
+import { AssetPath } from "./types/_cache";
 import { debug, extensions } from "./globals";
 import chalk from "chalk";
 
@@ -53,3 +53,9 @@ export function isCorrectFormat(fileName: string, include: RegExp, exclude?: Reg
 
 export const forEachKey = <T extends {}>(object: T, callbackfn: (key: string, value: T, index: number) => any) =>
     Object.keys(object).forEach((key, index) => callbackfn(key, object[key], index))
+
+export function getFileId(path: PathOrFileDescriptor): string {
+    let id = ""
+    new Uint8Array(readFileSync(path).buffer.slice(-8)).forEach(byte => id += byte)
+    return id
+}

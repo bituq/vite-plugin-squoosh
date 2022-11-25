@@ -2,7 +2,7 @@ import { debug } from "./globals";
 import { ModuleOptions } from "./types";
 import { ResolvedConfig, Logger, createLogger, Plugin } from 'vite';
 import path from 'path';
-import { forEachKey, pushImageAssets, readFilesRecursive, transformAssetPath } from "./utilities";
+import { forEachKey, getFileId, pushImageAssets, readFilesRecursive, transformAssetPath } from "./utilities";
 import chalk from 'chalk';
 import { ImagePool } from "@squoosh/lib";
 import fs from 'fs';
@@ -10,7 +10,7 @@ import os from 'os';
 import { defaultEncoderOptions, EncoderAsset, EncoderType } from "./types/_encoders";
 import { dim, header } from "./log";
 import EncoderOptions from "./types/_encoders";
-import PluginCache, { AssetPath } from "./types/_cache";
+import PluginCache, { AssetPath, CacheItem } from "./types/_cache";
 
 export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
     let outputPath: string
@@ -138,15 +138,16 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
                 if (asset.encodeWith && options.cacheLevel != "None") {
                     cache.assets ??= {}
                     cache.assets[asset.encodeWith] ??= []
-                    const other = cache.assets[asset.encodeWith].find(other => other.from == asset.asset.from)
+                    const id = getFileId(asset.asset.from)
+                    const other: CacheItem | undefined = cache.assets[asset.encodeWith].find((other: CacheItem) => other.id === id && other.paths.from === asset.asset.from)
 
                     if (reuse[asset.encodeWith] && other) {
-                        if (fs.existsSync(other.to) && fs.lstatSync(other.to).size < fs.lstatSync(asset.asset.from).size) {
-                            asset.asset.from = other.to
+                        if (fs.existsSync(other.paths.to)) {
+                            asset.asset.from = other.paths.to
                             asset.encodeWith = undefined
                         }
                     } else
-                        cache.assets[asset.encodeWith]?.push({...asset.asset})
+                        cache.assets[asset.encodeWith]?.push({id, paths: asset.asset})
                 }
 
                 asset.logPath += ' '.repeat(longestPathNameLength - asset.logPath.length)

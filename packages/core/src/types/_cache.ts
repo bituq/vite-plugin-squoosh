@@ -6,7 +6,12 @@ export interface FromTo<T> { from: T, to: T}
 
 export type AssetPath = FromTo<string>
 
+export interface CacheItem {
+    paths: AssetPath
+    id: string
+}
+
 export default interface PluginCache {
     options?: EncoderOptions
-    assets?: { [K in EncoderType]?: AssetPath[] }
+    assets?: { [K in EncoderType]?: CacheItem[] }
 }
