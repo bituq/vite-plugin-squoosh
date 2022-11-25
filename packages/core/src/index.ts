@@ -141,7 +141,7 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
                     const id = getFileId(asset.asset.from)
                     const other: CacheItem | undefined = cache.assets[asset.encodeWith].find((other: CacheItem) => other.id === id && other.paths.from === asset.asset.from)
 
-                    if (reuse[asset.encodeWith] && other) {
+                    if (reuse[asset.encodeWith] && other && fs.lstatSync(other.paths.to).size < fs.lstatSync(asset.asset.from).size) {
                         if (fs.existsSync(other.paths.to)) {
                             asset.asset.from = other.paths.to
                             asset.encodeWith = undefined
