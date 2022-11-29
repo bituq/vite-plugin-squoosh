@@ -49,6 +49,9 @@
     "vite",
     "vite-plugin",
     "squoosh",
-    "Dylan N"
+    "Dylan N",
+    "bituq",
+    "image-compression",
+    "compress-image"
   ]
 }

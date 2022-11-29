@@ -52,6 +52,7 @@ export default () => ({
 | includeDirs | `string[] \| {from: string, to: string}` | Additional directories to include. **WARNING!** These images will be replaced with their encoded versions. |
 | cacheLevel | `"None" \| "PerSession" \| "Persistent"` | Toggle asset caching. When enabled, encoded assets will be reused. |
 | cachePath | `string` |  The file path to store the cache to when the cache level is persistent. |
+| coreCount | `number` |  The amount of CPU cores to use at most for processing. *(default: all available cores)* |
 
 ## Build locally
 
