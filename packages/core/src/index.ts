@@ -130,17 +130,24 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
 
             newAssetPaths.forEach(asset => {
                 const ext = path.extname(asset.asset.from)
-                const encodeTo = options.encodeTo?.find(value => value.from.test(ext))?.to  
-                
+
+                // Determine the codec to use for encoding the asset based on the file extension.
+                const encodeTo = options.encodeTo?.find(value => value.from.test(ext))?.to
+ 
+                // If no codec was found, try to find a codec that matches the file extension.
                 asset.encodeWith = encodeTo ?? Object.keys(codecs).find(codec => codecs[codec].extension?.test(ext))
                 asset.size = fs.lstatSync(asset.asset.from).size
 
+                // If a codec was found and caching is enabled, try to find the asset in the cache.
                 if (asset.encodeWith && options.cacheLevel != "None") {
                     cache.assets ??= {}
                     cache.assets[asset.encodeWith] ??= []
                     const id = getFileId(asset.asset.from)
+
+                    // Try to find the asset in the cache using the unique identifier and the original path.
                     const other: CacheItem | undefined = cache.assets[asset.encodeWith].find((other: CacheItem) => other.id === id && other.paths.from === asset.asset.from)
 
+                    // If the asset is found in the cache, check if the cached version is smaller than the original.
                     if (reuse[asset.encodeWith] && other && fs.lstatSync(other.paths.to).size < fs.lstatSync(asset.asset.from).size) {
                         if (fs.existsSync(other.paths.to)) {
                             asset.asset.from = other.paths.to
@@ -150,6 +157,7 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
                         cache.assets[asset.encodeWith]?.push({id, paths: asset.asset})
                 }
 
+                // Align the log path for the asset based on the longest path name length
                 asset.logPath += ' '.repeat(longestPathNameLength - asset.logPath.length)
             })
 
