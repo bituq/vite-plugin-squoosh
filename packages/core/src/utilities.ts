@@ -32,12 +32,13 @@ export const pushImageAssets = (filePaths: string[], target: AssetPath[], transf
 export function readFilesRecursive(root: string, reg?: RegExp) {
     let resultArr: string[] = []
     try {
-        if (fs.existsSync(root))
-            if (fs.lstatSync(root).isDirectory())
-                fs.readdirSync(root)
-                    .forEach((file) => resultArr = resultArr.concat(readFilesRecursive(path.join(root, '/', file))))
-            else
-                if (reg === undefined || reg?.test(root))
+        // Check if the root path exists and is a directory.
+        if (fs.existsSync(root) && fs.lstatSync(root).isDirectory())
+            // Read all files in the root directory, and recursively read files in subdirectories.
+            fs.readdirSync(root).forEach((file) => resultArr = resultArr.concat(readFilesRecursive(path.join(root, '/', file))))
+        else
+            // If the root path is a file, check if it matched the regex.
+            if (reg === undefined || reg?.test(root))
                     resultArr.push(root)
     } catch (error) {
         console.log(error)
@@ -56,6 +57,7 @@ export const forEachKey = <T extends {}>(object: T, callbackfn: (key: string, va
 
 export function getFileId(path: PathOrFileDescriptor): string {
     let id = ""
-    new Uint8Array(readFileSync(path).buffer.slice(-8)).forEach(byte => id += byte)
+    const fileBytes = new Uint8Array(readFileSync(path).buffer.slice(-8));
+    fileBytes.forEach(byte => id += byte)
     return id
 }
