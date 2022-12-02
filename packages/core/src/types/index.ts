@@ -35,4 +35,9 @@ export interface ModuleOptions {
      * The file path to store the cache to when the cache level is persistent.
      */
     cachePath?: string
+    /**
+     * The maximum numbers of CPU cores to use.
+     * @default: All available CPU cores.
+     */
+    coreCount?: number
 }

@@ -87,6 +87,7 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
                 
                 newSize = encodedWith.size
 
+                // Only write file 
                 if (newSize < oldSize) {
                     fs.mkdirSync(path.dirname(asset.to), { recursive: true })
                     fs.writeFileSync(asset.to, encodedWith.binary)
@@ -96,19 +97,22 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
             }
 
             const startTime = Date.now()
-            const imagePool = new ImagePool(os.cpus().length)
+            const cpus = Math.max(1, Math.min(os.cpus().length, options.coreCount ?? os.cpus().length))
+            const imagePool = new ImagePool(cpus)
             
-            debug(dim("Running on", os.cpus().length, "cores."))
+            debug(dim("Running on", cpus, "CPU cores."))
             debug(dim(files.length, "assets queued."))
 
             let cache: PluginCache = {options: codecs}
 
+            // Read the cache file
             if (options.cacheLevel === "Persistent" && options.cachePath)
                 if (fs.existsSync(options.cachePath))
                     cache = JSON.parse(fs.readFileSync(options.cachePath, {encoding: "utf8"}))
 
             const reuse: {[K in EncoderType]?: boolean} = {}
 
+            
             forEachKey(codecs, (key, codec) => reuse[key] = JSON.stringify(cache.options?.[key]) == JSON.stringify(codec))
 
             forEachKey(reuse, (key, codec) => {
@@ -126,9 +130,11 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
             
             const longestPathNameLength = newAssetPaths.sort((a, b) => b.logPath.length - a.logPath.length)[0].logPath.length
             
-            Object.keys(reuse).forEach(codec => debug(codec, '=>', reuse[codec]))
+            forEachKey(reuse, codec => debug(codec, '=>', reuse[codec]))
 
             newAssetPaths.forEach(asset => {
+                if (!fs.existsSync(asset.asset.from)) return
+
                 const ext = path.extname(asset.asset.from)
 
                 // Determine the codec to use for encoding the asset based on the file extension.
@@ -148,11 +154,12 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
                     const other: CacheItem | undefined = cache.assets[asset.encodeWith].find((other: CacheItem) => other.id === id && other.paths.from === asset.asset.from)
 
                     // If the asset is found in the cache, check if the cached version is smaller than the original.
-                    if (reuse[asset.encodeWith] && other && fs.lstatSync(other.paths.to).size < fs.lstatSync(asset.asset.from).size) {
-                        if (fs.existsSync(other.paths.to)) {
-                            asset.asset.from = other.paths.to
-                            asset.encodeWith = undefined
-                        }
+                    if (reuse[asset.encodeWith] && other) {
+                        if (fs.existsSync(other.paths.to))
+                            if (fs.lstatSync(other.paths.to).size < fs.lstatSync(asset.asset.from).size) {
+                                asset.asset.from = other.paths.to
+                                asset.encodeWith = undefined
+                            }
                     } else
                         cache.assets[asset.encodeWith]?.push({id, paths: asset.asset})
                 }
