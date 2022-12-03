@@ -43,16 +43,17 @@ export default () => ({
 ```
 
 ### Plugin options
-| Option | type | description |
-| ------ | ---- | ----------- |
-| codecs | `EncoderOptions` | Codecs to use for processing. [See supported codecs](https://github.com/bituq/vite-plugin-squoosh/blob/master/packages/core/src/types/_encoders.ts). |
-| silent    | `boolean` | Disable logging. *(default: false)* |
-| exclude | `RegExp` | File names or extensions to exclude. |
-| encodeTo | `{ from: RegExp, to: EncoderType }[]` | Specify what certain file names or extensions will encode to. |
-| includeDirs | `string[] \| {from: string, to: string}` | Additional directories to include. **WARNING!** These images will be replaced with their encoded versions. |
-| cacheLevel | `"None" \| "PerSession" \| "Persistent"` | Toggle asset caching. When enabled, encoded assets will be reused. |
-| cachePath | `string` |  The file path to store the cache to when the cache level is persistent. |
-| coreCount | `number` |  The amount of CPU cores to use at most for processing. *(default: all available cores)* |
+The `squooshPlugin` function takes an options object as its only argument. The possible properties of this options object are:
+
+| Option           | Description                                                                                                                 |
+|------------------|---------------------------------------------------------------------------------------------------------------------------------|
+| `cacheLevel`     | A string that determines how aggressively to use caching to speed up processing. This can be `"None"`, `"PerSession"`, or `"Persistent"`. |
+| `cachePath`      | A string that specifies the path to the cache file on the filesystem.                                                            |
+| `codecs`         | An object that specifies the codecs to use for encoding the images.                                                              |
+| `coreCount`      | An optional integer that specifies the number of CPU cores to use for processing the images.                                      |
+| `exclude`        | An array of glob patterns that specify which files to exclude from processing.                                                    |
+| `includeDirs`    | An array of strings or objects that specify additional directories to search for images to process.                               |
+| `silent`         | A boolean that specifies whether to suppress logging output from the plugin.     
 
 ## Build locally
 
