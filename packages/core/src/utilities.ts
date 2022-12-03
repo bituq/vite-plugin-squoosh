@@ -55,9 +55,4 @@ export function isCorrectFormat(fileName: string, include: RegExp, exclude?: Reg
 export const forEachKey = <T extends {}>(object: T, callbackfn: (key: string, value: T, index: number) => any) =>
     Object.keys(object).forEach((key, index) => callbackfn(key, object[key], index))
 
-export function getFileId(path: PathOrFileDescriptor): string {
-    let id = ""
-    const fileBytes = new Uint8Array(readFileSync(path).buffer.slice(-8));
-    fileBytes.forEach(byte => id += byte)
-    return id
-}
+export const getFileId = (path: PathOrFileDescriptor): string => new Uint8Array(readFileSync(path).buffer.slice(-8)).reduce((id, byte) => id + byte, "")
