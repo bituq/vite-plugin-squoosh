@@ -128,7 +128,6 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
                 encodeWith: options.encodeTo?.find(value => value.from.test(path.extname(asset.from)))?.to
             }))
             
-            const longestPathNameLength = newAssetPaths.sort((a, b) => b.logPath.length - a.logPath.length)[0].logPath.length
             
             forEachKey(reuse, codec => debug(codec, '=>', reuse[codec]))
 
@@ -164,8 +163,7 @@ export default function squooshPlugin(options: ModuleOptions = {}): Plugin {
                         cache.assets[asset.encodeWith]?.push({id, paths: asset.asset})
                 }
 
-                // Align the log path for the asset based on the longest path name length
-                asset.logPath += ' '.repeat(longestPathNameLength - asset.logPath.length)
+                asset.logPath += ' '
             })
 
             let lastTime = 0
