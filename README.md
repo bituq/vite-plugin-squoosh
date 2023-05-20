@@ -1,4 +1,4 @@
-# vite-plugin-squoosh [![Build](https://github.com/bituq/vite-plugin-squoosh/actions/workflows/build.yml/badge.svg)](https://github.com/bituq/vite-plugin-squoosh/actions/workflows/build.yml)
+# vite-plugin-squoosh [![Build](https://github.com/bituq/vite-plugin-squoosh/actions/workflows/build.yml/badge.svg)](https://github.com/bituq/vite-plugin-squoosh/actions/workflows/build.yml) ![npm](https://img.shields.io/npm/dm/vite-plugin-squoosh)
 
 a build plugin for Vite that uses the [squoosh](https://github.com/GoogleChromeLabs/squoosh) library to compress images. It offers persistent caching and parallel processing, and supports a range of image formats. This can help improve performance and reduce image size in web applications.
 
